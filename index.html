@@ -300,6 +300,7 @@
       position: relative;
       min-width: 0;
       aspect-ratio: 1.22 / 1;
+      container-type: inline-size;
       padding: 0;
       border: 0;
       border-radius: 16px;
@@ -364,6 +365,7 @@
       z-index: 1;
       font-family: "Arial Black", Pretendard, Arial, sans-serif;
       font-size: clamp(32px, 4.4vw, 48px);
+      font-size: clamp(32px, 63cqw, 96px);
       font-weight: 900;
       letter-spacing: -.065em;
       line-height: .9;
@@ -379,13 +381,7 @@
     }
 
     .pick-label {
-      position: relative;
-      z-index: 1;
-      margin-top: 6px;
-      color: #b99aa6;
-      font-size: 7px;
-      font-weight: 900;
-      letter-spacing: .22em;
+      display: none;
     }
 
     .card-back {
@@ -414,24 +410,35 @@
     }
 
     .prize-icon {
-      margin-bottom: 4px;
-      font-size: clamp(22px, 2.8vw, 32px);
+      position: absolute;
+      top: 7cqw;
+      right: 8cqw;
+      margin: 0;
+      font-size: clamp(12px, 14cqw, 24px);
       filter: drop-shadow(0 3px 3px rgba(99,65,77,.12));
     }
 
     .card-back strong {
-      max-width: 94%;
-      overflow: hidden;
-      font-size: clamp(16px, 2.1vw, 24px);
+      max-width: 100%;
+      padding: 0 3px;
+      overflow: visible;
+      font-family: "Arial Black", Pretendard, Arial, sans-serif;
+      font-size: clamp(18px, 2.1vw, 24px);
+      font-size: clamp(20px, 42cqw, 64px);
       font-weight: 900;
-      line-height: 1.05;
-      text-overflow: ellipsis;
+      letter-spacing: -.09em;
+      line-height: .92;
+      text-overflow: clip;
       white-space: nowrap;
     }
 
+    .draw-card.reverse .card-back strong {
+      font-size: clamp(17px, 31cqw, 49px);
+    }
+
     .card-back small {
-      margin-top: 3px;
-      font-size: clamp(10px, 1.3vw, 14px);
+      margin-top: 5cqw;
+      font-size: clamp(8px, 10cqw, 14px);
       font-weight: 800;
       opacity: .72;
     }
@@ -539,11 +546,17 @@
       .draw-status strong { font-size: 15px; }
       .status-icon { font-size: 18px; }
       .raffle-board { gap: 6px; padding: 1px 15px 17px; }
-      .card-front strong { font-size: clamp(28px, 8vw, 34px); }
-      .pick-label { margin-top: 4px; font-size: 6px; }
-      .prize-icon { margin-bottom: 2px; font-size: 20px; }
-      .card-back strong { font-size: 15px; }
-      .card-back small { margin-top: 1px; font-size: 8px; }
+      .card-front strong {
+        font-size: 34px;
+        font-size: clamp(32px, 63cqw, 96px);
+      }
+      .prize-icon { font-size: clamp(12px, 14cqw, 24px); }
+      .card-back strong {
+        font-size: 20px;
+        font-size: clamp(20px, 42cqw, 64px);
+      }
+      .draw-card.reverse .card-back strong { font-size: clamp(17px, 31cqw, 49px); }
+      .card-back small { margin-top: 5cqw; font-size: clamp(8px, 10cqw, 14px); }
       .board-footer { padding: 11px 15px 14px; }
     }
 
