@@ -258,19 +258,23 @@
       align-items: center;
       justify-content: center;
       gap: 9px;
-      min-height: 38px;
+      min-height: 44px;
       padding: 6px 17px;
       border: 1px solid #f0e3e7;
       border-radius: 999px;
       color: #77656d;
       background: #fff9fa;
-      font-size: 13px;
-      font-weight: 650;
+      font-size: 16px;
+      font-weight: 700;
       text-align: center;
     }
 
-    .draw-status strong { color: var(--rose-dark); }
-    .status-icon { font-size: 17px; }
+    .draw-status strong {
+      color: var(--rose-dark);
+      font-size: 18px;
+      font-weight: 900;
+    }
+    .status-icon { font-size: 22px; }
 
     .remaining-count {
       color: #96858d;
@@ -358,11 +362,12 @@
     .card-front strong {
       position: relative;
       z-index: 1;
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(24px, 3vw, 36px);
-      font-weight: 500;
-      letter-spacing: -.04em;
-      line-height: 1;
+      font-family: "Arial Black", Pretendard, Arial, sans-serif;
+      font-size: clamp(32px, 4.4vw, 48px);
+      font-weight: 900;
+      letter-spacing: -.065em;
+      line-height: .9;
+      text-shadow: 0 1px 0 #fff;
     }
 
     .tiny-heart {
@@ -410,14 +415,14 @@
 
     .prize-icon {
       margin-bottom: 4px;
-      font-size: clamp(18px, 2.3vw, 27px);
+      font-size: clamp(22px, 2.8vw, 32px);
       filter: drop-shadow(0 3px 3px rgba(99,65,77,.12));
     }
 
     .card-back strong {
       max-width: 94%;
       overflow: hidden;
-      font-size: clamp(12px, 1.7vw, 19px);
+      font-size: clamp(16px, 2.1vw, 24px);
       font-weight: 900;
       line-height: 1.05;
       text-overflow: ellipsis;
@@ -426,7 +431,7 @@
 
     .card-back small {
       margin-top: 3px;
-      font-size: clamp(8px, 1vw, 11px);
+      font-size: clamp(10px, 1.3vw, 14px);
       font-weight: 800;
       opacity: .72;
     }
@@ -502,7 +507,8 @@
       .sound-button .button-text { display: none; }
       .sound-button { width: 42px; padding: 0; }
       .board-toolbar { grid-template-columns: auto 1fr; gap: 10px; padding: 13px 21px; }
-      .draw-status { justify-self: stretch; min-width: 0; font-size: 11px; }
+      .draw-status { justify-self: stretch; min-width: 0; font-size: 14px; }
+      .draw-status strong { font-size: 16px; }
       .remaining-count { display: none; }
       .raffle-board { grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; padding: 3px 21px 21px; }
       .draw-card { aspect-ratio: 1 / 1.08; border-radius: 12px; }
@@ -529,13 +535,15 @@
       .round-label { gap: 4px; }
       .round-label span { font-size: 8px; }
       .round-label strong { font-size: 17px; }
-      .draw-status { min-height: 33px; overflow: hidden; padding: 5px 8px; text-overflow: ellipsis; white-space: nowrap; }
+      .draw-status { min-height: 39px; overflow: hidden; padding: 5px 8px; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+      .draw-status strong { font-size: 15px; }
+      .status-icon { font-size: 18px; }
       .raffle-board { gap: 6px; padding: 1px 15px 17px; }
-      .card-front strong { font-size: 23px; }
+      .card-front strong { font-size: clamp(28px, 8vw, 34px); }
       .pick-label { margin-top: 4px; font-size: 6px; }
-      .prize-icon { margin-bottom: 2px; font-size: 18px; }
-      .card-back strong { font-size: 11px; }
-      .card-back small { margin-top: 1px; font-size: 7px; }
+      .prize-icon { margin-bottom: 2px; font-size: 20px; }
+      .card-back strong { font-size: 15px; }
+      .card-back small { margin-top: 1px; font-size: 8px; }
       .board-footer { padding: 11px 15px 14px; }
     }
 
