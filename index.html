@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6ecef">
+  <meta name="description" content="1번부터 30번까지, 매 판 새롭게 섞이는 미롱 방셀 뽑기판">
+  <title>미롱 방셀 뽑기</title>
+  <style>
+    :root {
+      --ink: #443840;
+      --muted: #8c7d86;
+      --rose: #c96c8b;
+      --rose-dark: #a94769;
+      --line: #eadde2;
+      --cream: #fffdfb;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      min-width: 320px;
+      min-height: 100%;
+      background: #f6ecef;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 12% 16%, rgba(255,255,255,.92) 0 7%, transparent 28%),
+        radial-gradient(circle at 88% 84%, rgba(225,181,196,.45) 0 5%, transparent 29%),
+        linear-gradient(145deg, #f8f0f2 0%, #ead9df 100%);
+    }
+
+    button { font: inherit; }
+
+    .raffle-shell {
+      position: relative;
+      display: grid;
+      min-height: 100vh;
+      place-items: center;
+      overflow: hidden;
+      padding: 38px 24px;
+    }
+
+    .ambient {
+      position: fixed;
+      z-index: 0;
+      width: 330px;
+      height: 330px;
+      border: 1px solid rgba(255,255,255,.7);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .ambient::before,
+    .ambient::after {
+      position: absolute;
+      color: rgba(191,103,133,.15);
+      content: "♥";
+      font-family: Georgia, serif;
+    }
+
+    .ambient::before {
+      top: 18%;
+      left: 24%;
+      font-size: 44px;
+      transform: rotate(-12deg);
+    }
+
+    .ambient::after {
+      right: 13%;
+      bottom: 20%;
+      font-size: 74px;
+      transform: rotate(14deg);
+    }
+
+    .ambient-one { top: -130px; left: -90px; }
+    .ambient-two { right: -110px; bottom: -120px; width: 390px; height: 390px; }
+
+    .raffle-card {
+      position: relative;
+      z-index: 1;
+      width: min(1100px, 100%);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.95);
+      border-radius: 30px;
+      background: rgba(255,253,251,.96);
+      box-shadow: 0 28px 80px rgba(98,61,75,.16), 0 4px 16px rgba(98,61,75,.08);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero {
+      padding: 29px 36px 22px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, rgba(255,248,248,.94), rgba(252,243,246,.94)),
+        repeating-linear-gradient(90deg, transparent 0 49px, rgba(201,108,139,.035) 49px 50px);
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+      color: var(--rose);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .17em;
+    }
+
+    .eyebrow-heart { font-size: 9px; }
+
+    .title-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 26px;
+    }
+
+    .title-row h1 {
+      margin: 0;
+      color: #4b3941;
+      font-family: Georgia, "Times New Roman", "Noto Serif KR", serif;
+      font-size: clamp(35px, 4vw, 54px);
+      font-weight: 700;
+      letter-spacing: -.055em;
+      line-height: 1.08;
+    }
+
+    .title-row p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .controls {
+      display: flex;
+      flex: 0 0 auto;
+      gap: 8px;
+    }
+
+    .control-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 800;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .sound-button {
+      border: 1px solid #e5d5db;
+      color: #79646d;
+      background: rgba(255,255,255,.8);
+    }
+
+    .sound-button[aria-pressed="false"] {
+      color: #9c9296;
+      background: #f3efef;
+    }
+
+    .shuffle-button {
+      border: 1px solid #b8587a;
+      color: #fff;
+      background: linear-gradient(135deg, #ce718f, #b85477);
+      box-shadow: 0 9px 20px rgba(180,78,114,.21);
+    }
+
+    .shuffle-button .icon { font-size: 19px; line-height: 0; }
+
+    .control-button:hover {
+      box-shadow: 0 10px 22px rgba(112,68,84,.18);
+      transform: translateY(-2px);
+    }
+
+    .control-button:active { transform: translateY(0); }
+
+    .control-button:focus-visible,
+    .draw-card:focus-visible {
+      outline: 3px solid rgba(177,70,107,.34);
+      outline-offset: 3px;
+    }
+
+    .prize-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .summary-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 31px;
+      padding: 0 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: #6d5d65;
+      background: rgba(255,255,255,.78);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .summary-chip strong { color: var(--ink); font-size: 11px; }
+
+    .summary-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #ccbfc5;
+    }
+
+    .summary-chip.bangsel .summary-dot { background: #d5567d; }
+    .summary-chip.jackpot .summary-dot { background: #c9982b; }
+    .summary-chip.reverse .summary-dot { background: #9b75bd; }
+    .summary-chip.blank .summary-dot { background: #aeb4ba; }
+
+    .board-toolbar {
+      display: grid;
+      grid-template-columns: auto minmax(280px, 1fr) auto;
+      align-items: center;
+      gap: 20px;
+      padding: 16px 36px;
+    }
+
+    .round-label {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+      color: #a18f97;
+    }
+
+    .round-label span {
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .14em;
+    }
+
+    .round-label strong {
+      color: var(--rose-dark);
+      font-family: Georgia, serif;
+      font-size: 20px;
+    }
+
+    .draw-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 38px;
+      padding: 6px 17px;
+      border: 1px solid #f0e3e7;
+      border-radius: 999px;
+      color: #77656d;
+      background: #fff9fa;
+      font-size: 13px;
+      font-weight: 650;
+      text-align: center;
+    }
+
+    .draw-status strong { color: var(--rose-dark); }
+    .status-icon { font-size: 17px; }
+
+    .remaining-count {
+      color: #96858d;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .remaining-count strong {
+      margin-left: 4px;
+      color: var(--ink);
+      font-family: Georgia, serif;
+      font-size: 18px;
+    }
+
+    .raffle-board {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 11px;
+      padding: 4px 36px 25px;
+    }
+
+    .draw-card {
+      position: relative;
+      min-width: 0;
+      aspect-ratio: 1.22 / 1;
+      padding: 0;
+      border: 0;
+      border-radius: 16px;
+      background: transparent;
+      cursor: pointer;
+      perspective: 700px;
+    }
+
+    .draw-card:disabled { cursor: default; }
+
+    .card-inner {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      box-shadow: 0 5px 14px rgba(97,69,79,.1);
+      transform-style: preserve-3d;
+      transition: transform 520ms cubic-bezier(.2,.78,.28,1.08), box-shadow 180ms ease;
+    }
+
+    .draw-card:not(:disabled):hover .card-inner {
+      box-shadow: 0 11px 21px rgba(155,77,105,.18);
+      transform: translateY(-3px) rotate(-.5deg);
+    }
+
+    .draw-card.is-revealed .card-inner,
+    .draw-card.is-revealed:hover .card-inner {
+      box-shadow: 0 7px 17px rgba(97,69,79,.12);
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 1px solid #e3ced6;
+      border-radius: inherit;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    .card-front {
+      color: #7d5463;
+      background:
+        radial-gradient(circle at 100% 0, rgba(209,115,148,.16), transparent 38%),
+        linear-gradient(145deg, #fffafb, #f7e9ee);
+    }
+
+    .card-front::after {
+      position: absolute;
+      inset: 5px;
+      border: 1px solid rgba(198,132,155,.28);
+      border-radius: 11px;
+      content: "";
+    }
+
+    .card-front strong {
+      position: relative;
+      z-index: 1;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(24px, 3vw, 36px);
+      font-weight: 500;
+      letter-spacing: -.04em;
+      line-height: 1;
+    }
+
+    .tiny-heart {
+      position: absolute;
+      top: 11px;
+      right: 13px;
+      color: #cc819b;
+      font-size: 10px;
+    }
+
+    .pick-label {
+      position: relative;
+      z-index: 1;
+      margin-top: 6px;
+      color: #b99aa6;
+      font-size: 7px;
+      font-weight: 900;
+      letter-spacing: .22em;
+    }
+
+    .card-back {
+      border-color: #d8bbc6;
+      color: #843c57;
+      background: linear-gradient(145deg, #fff6f8, #f4dce5);
+      transform: rotateY(180deg);
+    }
+
+    .draw-card.jackpot .card-back {
+      border-color: #e1c26b;
+      color: #765514;
+      background: linear-gradient(145deg, #fffaf0, #f8e7b8);
+    }
+
+    .draw-card.reverse .card-back {
+      border-color: #cab4dc;
+      color: #684b80;
+      background: linear-gradient(145deg, #fbf8ff, #eadcf5);
+    }
+
+    .draw-card.blank .card-back {
+      border-color: #d5d8da;
+      color: #73777b;
+      background: linear-gradient(145deg, #fbfbfb, #e9ebec);
+    }
+
+    .prize-icon {
+      margin-bottom: 4px;
+      font-size: clamp(18px, 2.3vw, 27px);
+      filter: drop-shadow(0 3px 3px rgba(99,65,77,.12));
+    }
+
+    .card-back strong {
+      max-width: 94%;
+      overflow: hidden;
+      font-size: clamp(12px, 1.7vw, 19px);
+      font-weight: 900;
+      line-height: 1.05;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .card-back small {
+      margin-top: 3px;
+      font-size: clamp(8px, 1vw, 11px);
+      font-weight: 800;
+      opacity: .72;
+    }
+
+    .draw-card.shake .card-inner { animation: card-shake 360ms ease; }
+
+    .board-footer {
+      display: grid;
+      grid-template-columns: 1fr minmax(150px, 270px) auto;
+      align-items: center;
+      gap: 17px;
+      padding: 15px 36px 18px;
+      border-top: 1px solid var(--line);
+      color: #918087;
+      background: #fdf9f9;
+      font-size: 11px;
+    }
+
+    .board-footer p { margin: 0; font-weight: 650; }
+
+    .progress {
+      height: 5px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #ebdfe3;
+    }
+
+    .progress span {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #d57c99, #af4d70);
+      transition: width 260ms ease;
+    }
+
+    .board-footer > strong {
+      min-width: 42px;
+      color: #715e66;
+      text-align: right;
+    }
+
+    .confetti-piece {
+      position: fixed;
+      z-index: 10;
+      width: 9px;
+      height: 13px;
+      border-radius: 2px;
+      pointer-events: none;
+      animation: confetti-pop 850ms cubic-bezier(.14,.78,.32,1) forwards;
+    }
+
+    @keyframes confetti-pop {
+      0% { opacity: 1; transform: translate(-50%, -50%) scale(.7) rotate(0); }
+      72% { opacity: 1; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1) rotate(var(--r)); }
+      100% { opacity: 0; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--fall))) scale(.8) rotate(var(--r)); }
+    }
+
+    @keyframes card-shake {
+      0%, 100% { transform: rotateY(180deg) translateX(0); }
+      25% { transform: rotateY(180deg) translateX(-5px) rotate(-1deg); }
+      50% { transform: rotateY(180deg) translateX(5px) rotate(1deg); }
+      75% { transform: rotateY(180deg) translateX(-3px); }
+    }
+
+    @media (max-width: 780px) {
+      .raffle-shell { padding: 18px 12px; }
+      .raffle-card { border-radius: 22px; }
+      .hero { padding: 24px 21px 19px; }
+      .title-row { align-items: center; }
+      .title-row p { font-size: 13px; }
+      .control-button { min-height: 42px; padding: 0 13px; font-size: 12px; }
+      .sound-button .button-text { display: none; }
+      .sound-button { width: 42px; padding: 0; }
+      .board-toolbar { grid-template-columns: auto 1fr; gap: 10px; padding: 13px 21px; }
+      .draw-status { justify-self: stretch; min-width: 0; font-size: 11px; }
+      .remaining-count { display: none; }
+      .raffle-board { grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; padding: 3px 21px 21px; }
+      .draw-card { aspect-ratio: 1 / 1.08; border-radius: 12px; }
+      .card-front::after { inset: 4px; border-radius: 8px; }
+      .tiny-heart { top: 8px; right: 9px; }
+      .board-footer { grid-template-columns: 1fr auto; padding: 13px 21px 15px; }
+      .board-footer p { display: none; }
+    }
+
+    @media (max-width: 520px) {
+      .raffle-shell { display: block; min-height: 100svh; padding: 0; background: var(--cream); }
+      .raffle-card { min-height: 100svh; border: 0; border-radius: 0; box-shadow: none; }
+      .hero { padding: 21px 15px 16px; }
+      .title-row { gap: 10px; }
+      .title-row h1 { font-size: 30px; }
+      .title-row p { margin-top: 5px; font-size: 11px; }
+      .controls { gap: 5px; }
+      .control-button { width: 40px; min-width: 40px; height: 40px; padding: 0; font-size: 0; }
+      .control-button .icon { font-size: 20px; }
+      .prize-summary { gap: 5px; margin-top: 15px; }
+      .summary-chip { min-height: 27px; padding: 0 8px; font-size: 10px; }
+      .summary-chip strong { font-size: 9px; }
+      .board-toolbar { padding: 10px 15px; }
+      .round-label { gap: 4px; }
+      .round-label span { font-size: 8px; }
+      .round-label strong { font-size: 17px; }
+      .draw-status { min-height: 33px; overflow: hidden; padding: 5px 8px; text-overflow: ellipsis; white-space: nowrap; }
+      .raffle-board { gap: 6px; padding: 1px 15px 17px; }
+      .card-front strong { font-size: 23px; }
+      .pick-label { margin-top: 4px; font-size: 6px; }
+      .prize-icon { margin-bottom: 2px; font-size: 18px; }
+      .card-back strong { font-size: 11px; }
+      .card-back small { margin-top: 1px; font-size: 7px; }
+      .board-footer { padding: 11px 15px 14px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="raffle-shell">
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <section class="raffle-card" aria-labelledby="raffle-title">
+      <header class="hero">
+        <div class="eyebrow">
+          <span class="eyebrow-heart" aria-hidden="true">♥</span>
+          오늘의 행운을 골라봐
+          <span class="eyebrow-heart" aria-hidden="true">♥</span>
+        </div>
+
+        <div class="title-row">
+          <div>
+            <h1 id="raffle-title">미롱 방셀 뽑기</h1>
+            <p>끌리는 번호 하나를 콕 눌러주세요!</p>
+          </div>
+
+          <div class="controls">
+            <button class="control-button sound-button" id="sound-button" type="button" aria-pressed="true" aria-label="효과음 켜짐">
+              <span class="icon" id="sound-icon" aria-hidden="true">🔊</span>
+              <span class="button-text">효과음</span>
+            </button>
+            <button class="control-button shuffle-button" id="shuffle-button" type="button">
+              <span class="icon" aria-hidden="true">↻</span>
+              <span class="button-text">새 판 섞기</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="prize-summary" aria-label="상품 구성">
+          <div class="summary-chip bangsel"><span class="summary-dot" aria-hidden="true"></span><span>방셀❤️</span><strong>1개</strong></div>
+          <div class="summary-chip jackpot"><span class="summary-dot" aria-hidden="true"></span><span>잭팟❤️</span><strong>1개</strong></div>
+          <div class="summary-chip reverse"><span class="summary-dot" aria-hidden="true"></span><span>역10❤️</span><strong>12개</strong></div>
+          <div class="summary-chip blank"><span class="summary-dot" aria-hidden="true"></span><span>끼낑(꽝)</span><strong>16개</strong></div>
+        </div>
+      </header>
+
+      <div class="board-toolbar">
+        <div class="round-label"><span>ROUND</span><strong id="round-number">01</strong></div>
+        <div class="draw-status" id="draw-status" aria-live="polite">
+          <span class="status-icon" aria-hidden="true">✦</span>
+          <span>어떤 번호에 행운이 숨어 있을까요?</span>
+        </div>
+        <div class="remaining-count">남은 카드 <strong id="remaining-count">30</strong></div>
+      </div>
+
+      <div class="raffle-board" id="raffle-board" aria-label="1번부터 30번까지 뽑기판"></div>
+
+      <footer class="board-footer">
+        <p><span aria-hidden="true">💡</span> 당첨과 꽝의 효과음이 다르게 재생돼요.</p>
+        <div class="progress" role="progressbar" aria-label="확인한 카드" aria-valuemin="0" aria-valuemax="30" aria-valuenow="0">
+          <span id="progress-bar"></span>
+        </div>
+        <strong id="progress-text">0 / 30</strong>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const BOARD_SIZE = 30;
+      const PRIZE_POOL = [
+        { label: "방셀❤️", shortLabel: "방셀", kind: "bangsel", icon: "💝" },
+        { label: "잭팟❤️", shortLabel: "잭팟", kind: "jackpot", icon: "🎉" },
+        ...Array.from({ length: 12 }, () => ({ label: "역10❤️", shortLabel: "역10", kind: "reverse", icon: "💗" })),
+        ...Array.from({ length: 16 }, () => ({ label: "끼낑(꽝)", shortLabel: "끼낑", kind: "blank", icon: "🥺" }))
+      ];
+
+      const state = {
+        prizes: [],
+        revealed: new Set(),
+        round: 1,
+        soundEnabled: true,
+        audioContext: null
+      };
+
+      const board = document.getElementById("raffle-board");
+      const status = document.getElementById("draw-status");
+      const roundNumber = document.getElementById("round-number");
+      const remainingCount = document.getElementById("remaining-count");
+      const progressBar = document.getElementById("progress-bar");
+      const progressText = document.getElementById("progress-text");
+      const progress = document.querySelector("[role='progressbar']");
+      const soundButton = document.getElementById("sound-button");
+      const soundIcon = document.getElementById("sound-icon");
+      const shuffleButton = document.getElementById("shuffle-button");
+
+      function randomIndex(maxExclusive) {
+        if (!window.crypto || !window.crypto.getRandomValues) {
+          return Math.floor(Math.random() * maxExclusive);
+        }
+
+        const range = 0x100000000;
+        const limit = range - (range % maxExclusive);
+        const values = new Uint32Array(1);
+        let value;
+
+        do {
+          window.crypto.getRandomValues(values);
+          value = values[0];
+        } while (value >= limit);
+
+        return value % maxExclusive;
+      }
+
+      function shuffledPrizes() {
+        const shuffled = PRIZE_POOL.map((prize) => ({ ...prize }));
+
+        for (let current = shuffled.length - 1; current > 0; current -= 1) {
+          const swapWith = randomIndex(current + 1);
+          [shuffled[current], shuffled[swapWith]] = [shuffled[swapWith], shuffled[current]];
+        }
+
+        return shuffled;
+      }
+
+      function createCard(number, prize) {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = `draw-card ${prize.kind}`;
+        card.setAttribute("aria-label", `${number}번 뽑기`);
+        card.dataset.index = String(number - 1);
+        card.innerHTML = `
+          <span class="card-inner">
+            <span class="card-face card-front">
+              <span class="tiny-heart" aria-hidden="true">♥</span>
+              <strong>${String(number).padStart(2, "0")}</strong>
+              <span class="pick-label">PICK</span>
+            </span>
+            <span class="card-face card-back">
+              <span class="prize-icon" aria-hidden="true">${prize.icon}</span>
+              <strong>${prize.shortLabel}</strong>
+              <small>${prize.kind === "blank" ? "(꽝)" : "❤️"}</small>
+            </span>
+          </span>`;
+        card.addEventListener("click", () => revealCard(number - 1, card));
+        return card;
+      }
+
+      function renderBoard() {
+        const fragment = document.createDocumentFragment();
+        state.prizes.forEach((prize, index) => fragment.appendChild(createCard(index + 1, prize)));
+        board.replaceChildren(fragment);
+      }
+
+      function updateProgress() {
+        const count = state.revealed.size;
+        const remaining = BOARD_SIZE - count;
+        remainingCount.textContent = String(remaining);
+        progressText.textContent = `${count} / ${BOARD_SIZE}`;
+        progressBar.style.width = `${(count / BOARD_SIZE) * 100}%`;
+        progress.setAttribute("aria-valuenow", String(count));
+      }
+
+      function newRound(isFirstRound = false) {
+        state.prizes = shuffledPrizes();
+        state.revealed = new Set();
+        if (!isFirstRound) state.round += 1;
+        roundNumber.textContent = String(state.round).padStart(2, "0");
+        status.innerHTML = '<span class="status-icon" aria-hidden="true">✦</span><span>새로운 행운을 골고루 섞었어요!</span>';
+        renderBoard();
+        updateProgress();
+      }
+
+      async function getAudioContext() {
+        if (!state.soundEnabled) return null;
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return null;
+        if (!state.audioContext) state.audioContext = new AudioContextClass();
+        if (state.audioContext.state === "suspended") await state.audioContext.resume();
+        return state.audioContext;
+      }
+
+      function playTone(context, frequency, start, duration, type, volume) {
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, start);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(volume, start + 0.018);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start(start);
+        oscillator.stop(start + duration + 0.02);
+      }
+
+      async function playWinSound() {
+        const context = await getAudioContext();
+        if (!context) return;
+        const now = context.currentTime + 0.015;
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((frequency, index) => {
+          playTone(context, frequency, now + index * 0.095, 0.28, index === 3 ? "sine" : "triangle", 0.075);
+        });
+        playTone(context, 1567.98, now + 0.31, 0.22, "sine", 0.035);
+      }
+
+      async function playLoseSound() {
+        const context = await getAudioContext();
+        if (!context) return;
+        const now = context.currentTime + 0.015;
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.type = "triangle";
+        oscillator.frequency.setValueAtTime(220, now);
+        oscillator.frequency.exponentialRampToValueAtTime(78, now + 0.48);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.065, now + 0.02);
+        gain.gain.setValueAtTime(0.05, now + 0.28);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start(now);
+        oscillator.stop(now + 0.52);
+      }
+
+      function celebrate(card) {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        const rect = card.getBoundingClientRect();
+        const colors = ["#d65a82", "#f0ba42", "#9d79c3", "#ef8eaa", "#fff0a8"];
+
+        for (let index = 0; index < 16; index += 1) {
+          const piece = document.createElement("span");
+          const angle = (Math.PI * 2 * index) / 16 + Math.random() * 0.25;
+          const distance = 65 + Math.random() * 85;
+          const x = Math.cos(angle) * distance;
+          const y = Math.sin(angle) * distance - 30;
+          piece.className = "confetti-piece";
+          piece.style.left = `${rect.left + rect.width / 2}px`;
+          piece.style.top = `${rect.top + rect.height / 2}px`;
+          piece.style.background = colors[index % colors.length];
+          piece.style.setProperty("--x", `${x}px`);
+          piece.style.setProperty("--y", `${y}px`);
+          piece.style.setProperty("--fall", `${y + 55}px`);
+          piece.style.setProperty("--r", `${180 + Math.random() * 540}deg`);
+          document.body.appendChild(piece);
+          window.setTimeout(() => piece.remove(), 900);
+        }
+      }
+
+      function revealCard(index, card) {
+        if (state.revealed.has(index)) return;
+        const prize = state.prizes[index];
+        state.revealed.add(index);
+        card.classList.add("is-revealed");
+        card.disabled = true;
+        card.setAttribute("aria-label", `${index + 1}번 결과: ${prize.label}`);
+        status.innerHTML = `<span class="status-icon" aria-hidden="true">${prize.icon}</span><span><strong>${index + 1}번</strong> 결과는 ${prize.label}</span>`;
+
+        if (prize.kind === "blank") {
+          void playLoseSound();
+          window.setTimeout(() => card.classList.add("shake"), 390);
+          window.setTimeout(() => card.classList.remove("shake"), 850);
+        } else {
+          void playWinSound();
+          celebrate(card);
+        }
+
+        updateProgress();
+      }
+
+      soundButton.addEventListener("click", () => {
+        state.soundEnabled = !state.soundEnabled;
+        soundButton.setAttribute("aria-pressed", String(state.soundEnabled));
+        soundButton.setAttribute("aria-label", state.soundEnabled ? "효과음 켜짐" : "효과음 꺼짐");
+        soundIcon.textContent = state.soundEnabled ? "🔊" : "🔇";
+        if (state.soundEnabled) void getAudioContext();
+      });
+
+      shuffleButton.addEventListener("click", () => newRound(false));
+      newRound(true);
+    })();
+  </script>
+</body>
+</html>
