@@ -14,6 +14,17 @@
       --rose-dark: #a94769;
       --line: #eadde2;
       --cream: #fffdfb;
+      --board-yellow-light: #fff76a;
+      --board-yellow: #ffc800;
+      --board-yellow-dark: #b86b00;
+      --bangsel-light: #ff5c70;
+      --bangsel-dark: #d4073b;
+      --jackpot-light: #a56cff;
+      --jackpot-dark: #6425c7;
+      --reverse-light: #32d977;
+      --reverse-dark: #078448;
+      --blank-light: #4f9cff;
+      --blank-dark: #1852bd;
     }
 
     * { box-sizing: border-box; }
@@ -221,10 +232,10 @@
       background: #ccbfc5;
     }
 
-    .summary-chip.bangsel .summary-dot { background: #d5567d; }
-    .summary-chip.jackpot .summary-dot { background: #c9982b; }
-    .summary-chip.reverse .summary-dot { background: #9b75bd; }
-    .summary-chip.blank .summary-dot { background: #aeb4ba; }
+    .summary-chip.bangsel .summary-dot { background: var(--bangsel-dark); }
+    .summary-chip.jackpot .summary-dot { background: var(--jackpot-dark); }
+    .summary-chip.reverse .summary-dot { background: var(--reverse-dark); }
+    .summary-chip.blank .summary-dot { background: var(--blank-dark); }
 
     .board-toolbar {
       display: grid;
@@ -293,7 +304,8 @@
       display: grid;
       grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: 11px;
-      padding: 4px 36px 25px;
+      padding: 14px 36px 25px;
+      background: linear-gradient(180deg, #fff8ba 0%, #fffdfb 100%);
     }
 
     .draw-card {
@@ -346,16 +358,17 @@
     }
 
     .card-front {
-      color: #7d5463;
+      border-color: var(--board-yellow-dark);
+      color: #402900;
       background:
-        radial-gradient(circle at 100% 0, rgba(209,115,148,.16), transparent 38%),
-        linear-gradient(145deg, #fffafb, #f7e9ee);
+        radial-gradient(circle at 100% 0, rgba(255,255,255,.64), transparent 38%),
+        linear-gradient(145deg, var(--board-yellow-light), var(--board-yellow));
     }
 
     .card-front::after {
       position: absolute;
       inset: 5px;
-      border: 1px solid rgba(198,132,155,.28);
+      border: 1px solid rgba(104,67,0,.3);
       border-radius: 11px;
       content: "";
     }
@@ -369,14 +382,14 @@
       font-weight: 900;
       letter-spacing: -.065em;
       line-height: .9;
-      text-shadow: 0 1px 0 #fff;
+      text-shadow: 0 2px 0 rgba(255,255,255,.48);
     }
 
     .tiny-heart {
       position: absolute;
       top: 11px;
       right: 13px;
-      color: #cc819b;
+      color: #a94d00;
       font-size: 10px;
     }
 
@@ -385,28 +398,28 @@
     }
 
     .card-back {
-      border-color: #d8bbc6;
-      color: #843c57;
-      background: linear-gradient(145deg, #fff6f8, #f4dce5);
+      border-color: #a9002d;
+      color: #fff;
+      background: linear-gradient(145deg, var(--bangsel-light), var(--bangsel-dark));
       transform: rotateY(180deg);
     }
 
     .draw-card.jackpot .card-back {
-      border-color: #e1c26b;
-      color: #765514;
-      background: linear-gradient(145deg, #fffaf0, #f8e7b8);
+      border-color: #4d159e;
+      color: #fff;
+      background: linear-gradient(145deg, var(--jackpot-light), var(--jackpot-dark));
     }
 
     .draw-card.reverse .card-back {
-      border-color: #cab4dc;
-      color: #684b80;
-      background: linear-gradient(145deg, #fbf8ff, #eadcf5);
+      border-color: #056c3a;
+      color: #fff;
+      background: linear-gradient(145deg, var(--reverse-light), var(--reverse-dark));
     }
 
     .draw-card.blank .card-back {
-      border-color: #d5d8da;
-      color: #73777b;
-      background: linear-gradient(145deg, #fbfbfb, #e9ebec);
+      border-color: #123f98;
+      color: #fff;
+      background: linear-gradient(145deg, var(--blank-light), var(--blank-dark));
     }
 
     .prize-icon {
@@ -428,6 +441,7 @@
       font-weight: 900;
       letter-spacing: -.09em;
       line-height: .92;
+      text-shadow: 0 2px 3px rgba(0,0,0,.28);
       text-overflow: clip;
       white-space: nowrap;
     }
@@ -440,7 +454,9 @@
       margin-top: 5cqw;
       font-size: clamp(8px, 10cqw, 14px);
       font-weight: 800;
-      opacity: .72;
+      color: #fff;
+      opacity: .96;
+      text-shadow: 0 1px 2px rgba(0,0,0,.26);
     }
 
     .draw-card.shake .card-inner { animation: card-shake 360ms ease; }
